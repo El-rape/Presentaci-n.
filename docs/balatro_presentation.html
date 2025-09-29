@@ -1,0 +1,126 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Presentación de Balatro</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        header {
+            background-color: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 2em;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .slide {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        h2 {
+            color: #2c3e50;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        .image-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+        .image-grid img {
+            max-width: 300px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Balatro: Una Introducción al Juego y sus Mecánicas Básicas</h1>
+    </header>
+    <div class="container">
+        <div class="slide">
+            <h2>¿Qué es Balatro?</h2>
+            <p>Balatro es un juego de cartas roguelike que combina elementos de póker con mecánicas de construcción de mazos. Desarrollado por LocalThunk y publicado por Playstack, el juego desafía a los jugadores a crear combinaciones estratégicas para maximizar puntuaciones y superar rondas.</p>
+            <img src="images/BLT1.jpg" alt="Portada de Balatro">
+        </div>
+        <div class="slide">
+            <h2>Mecánicas Básicas</h2>
+            <ul>
+                <li><strong>Mano de Póker:</strong> Los jugadores forman manos basadas en combinaciones de póker (parejas, tríos, escaleras, etc.) para ganar puntos.</li>
+                <li><strong>Jokers:</strong> Cartas especiales que otorgan bonificaciones únicas, como multiplicadores de puntuación o efectos adicionales.</li>
+                <li><strong>Cartas Mejoradas:</strong> Cartas con modificadores (oro, acero, bonus) que aumentan su valor o añaden efectos.</li>
+                <li><strong>Tienda y Mejoras:</strong> Entre rondas, los jugadores pueden comprar cartas, jokers o mejoras para optimizar su mazo.</li>
+            </ul>
+            <div class="image-grid">
+                <img src="images/BLT2.jpg" alt="Ejemplo de mano en Balatro">
+                <img src="images/BLT3.jpg" alt="Joker en acción">
+            </div>
+        </div>
+        <div class="slide">
+            <h2>Estrategia y Progresión</h2>
+            <p>El objetivo es superar "blinds" (desafíos) con puntuaciones crecientes. Los jugadores deben equilibrar riesgo y recompensa, eligiendo cuándo jugar manos seguras o experimentar con combinaciones arriesgadas. La rejugabilidad es alta debido a la aleatoriedad y la variedad de jokers.</p>
+            <img src="images/BLT4.jpg" alt="Interfaz de tienda en Balatro">
+        </div>
+        <div class="slide">
+            <h2>Por Qué Jugar Balatro</h2>
+            <p>Balatro destaca por su adictiva jugabilidad, arte vibrante y banda sonora envolvente. Es ideal para quienes disfrutan de juegos estratégicos con un toque de creatividad y sorpresa.</p>
+        </div>
+    </div>
+</body>
+</html>
